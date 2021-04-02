@@ -4,5 +4,6 @@ openpyxl
 geopandas
 dash
 dash-bootstrap-components
+dash_dangerously_set_inner_html
 python-srtm
 dash_daq
