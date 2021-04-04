@@ -10,6 +10,7 @@ from layouts.visualization import *
 from layouts.headers import *
 from layouts.sidebars import *
 from layouts.footers import *
+from layouts.body import *
 
 
 """
@@ -20,8 +21,7 @@ Tab 1
 
 TAB_1 = html.Div(
     children=[
-
-        # Page Header
+        # Header --------------------------------------------------------------
         html.Div(
             children=[
                 html.Div(
@@ -33,32 +33,30 @@ TAB_1 = html.Div(
             ],
             className="row"
         ),
-
-        # Page Main
+        # Sidebar & Body ------------------------------------------------------
         html.Div(
             children=[
-
-                # Sidebar
+                # Sidebar ---------------------------------
                 html.Div(
                     children=[
                         SIDEBAR_TAB_1
                     ],
                     className='my-sidebar'
                 ),
-
-                #
+                # Body ------------------------------------
                 html.Div(
                     children=[
-                        "This is Main Page"
+                        html.Div(
+                            children=BODY_TAB_1,
+                            className="container-fluid"
+                        )
                     ],
-                    className='col border p-1 m-1'
+                    className='col px-1 mx-1'
                 ),
-
             ],
             className="row p-0 m-0 w-100"
         ),
-
-        # Page Footer
+        # Footer --------------------------------------------------------------
         html.Div(
             children=[
                 html.Div(
@@ -70,8 +68,17 @@ TAB_1 = html.Div(
             ],
             className="row"
         ),
-
-
+        # Hidden Div For Store Data--------------------------------------------
+        html.Div(
+            children=[
+                html.Div(
+                    id="database",
+                )               
+            ],
+            style={
+                'display': 'none'
+            }
+        )
     ],
     className="container-fluid p-0"
 )

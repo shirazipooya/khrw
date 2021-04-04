@@ -1,3 +1,10 @@
+/* @font-face {
+  font-family: "Operator";
+  src: url("../fonts/operator-light-webfont.eot");
+  src: url("../fonts/operator-light-webfont.woff") format("woff"),
+    url("../fonts/operator-light-webfont.ttf") format("truetype");
+} */
+
 * {
   margin: 0;
   padding: 0;
@@ -16,9 +23,36 @@
   border-style: dashed;
   border-radius: 5px;
   text-align: center;
+  background-color: rgb(245, 245, 245);
 }
 
 body {
-  direction: rtl;
-  text-align: right;
+  /* font-family: "Operator"; */
+  /* direction: rtl; */
+  /* text-align: right; */
+}
+
+.breakLine {
+  display: flex;
+  flex-direction: row;
+}
+
+.breakLine:before,
+.breakLine:after {
+  content: "";
+  flex: 1 1;
+  border-bottom: 2px dashed;
+  margin: auto;
+}
+
+.breakLine:before {
+  margin-right: 10px;
+}
+
+.breakLine:after {
+  margin-left: 10px;
+}
+
+.btn {
+  min-width: 80px;
 }

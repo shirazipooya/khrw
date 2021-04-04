@@ -11,16 +11,17 @@ Footer Tab 1
 
 FOOTER_TAB_1 = html.Div(
     children=[
-        html.H3(
-            children=[
-                "Pooya! ",
-                html.Small(
-                    children=[
-                        "Interface Builder for Bootstrap"
-                    ]
-                )
-            ],
-            className='page-header m-1 pb-2')
+        html.Small(
+            dcc.Markdown(
+                dangerously_allow_html=True,
+                children=[
+                    '''
+                    © All Rights Reserved by
+                    <b>Khorasan Razavi Regional Water Authority</b>
+                    '''
+                ]
+            ),
+            className='page-header m-1 py-2')
     ],
     className="page-header text-center"
 )

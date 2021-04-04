@@ -7,27 +7,32 @@ from server import app
 from layouts.tabs import *
 
 
-Tab_Pan = html.Div(
+"""
+-------------------------------------------------------------------------------
+Tab Pan
+-------------------------------------------------------------------------------
+"""
+TAB_PAN = html.Div(
     children=[
 
-        # Nav Tabs
+        # Nav Tabs ------------------------------------------------------------
         dash_dangerously_set_inner_html.DangerouslySetInnerHTML(
             """
                     <ul class="nav nav-tabs mt-1" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#Section1">Section 1</a>
+                            <a class="nav-link active" data-toggle="tab" href="#Tab_1">Data Entry Tab</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#Section2">Section 2</a>
+                            <a class="nav-link" data-toggle="tab" href="#Tab_2">Section 2</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#Section3">Section 3</a>
+                            <a class="nav-link" data-toggle="tab" href="#Tab_3">Section 3</a>
                         </li>
                     </ul>
             """
         ),
 
-        # Tab Panes
+        # Tab Panes -----------------------------------------------------------
         html.Div(
             children=[
                 html.Div(
@@ -35,21 +40,21 @@ Tab_Pan = html.Div(
                         TAB_1
                     ],
                     className="tab-pane active",
-                    id="Section1"
+                    id="Tab_1"
                 ),
                 html.Div(
                     children=[
                         "Section 2"
                     ],
                     className="tab-pane fade",
-                    id="Section2"
+                    id="Tab_2"
                 ),
                 html.Div(
                     children=[
                         "Section 3"
                     ],
                     className="tab-pane fade",
-                    id="Section3"
+                    id="Tab_3"
                 )
             ],
             className="tab-content"
@@ -59,13 +64,19 @@ Tab_Pan = html.Div(
 )
 
 
+"""
+-------------------------------------------------------------------------------
+Main Layout
+-------------------------------------------------------------------------------
+"""
+
 main_layout = html.Div(
     children=[
         html.Div(
             children=[
                 html.Div(
                     children=[
-                        Tab_Pan
+                        TAB_PAN
                     ],
                     className="col"
                 )

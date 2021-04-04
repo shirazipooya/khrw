@@ -1,8 +1,4 @@
-from server import app
-from callbacks.data import *
-
 import pandas as pd
-
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -10,13 +6,18 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import plotly.express as px
 
-No_Matching_Data_Found_Fig = {
+from server import app
+from callbacks.data_analysis import *
+
+
+# No Matching Data Found Template
+No_Database_Connection = {
     "layout": {
         "xaxis": {"visible": False},
         "yaxis": {"visible": False},
         "annotations": [
             {
-                "text": "No matching data found",
+                "text": "No Database Connection ...",
                 "xref": "paper",
                 "yref": "paper",
                 "showarrow": False,
@@ -27,65 +28,62 @@ No_Matching_Data_Found_Fig = {
 }
 
 
-
-# Update Upload Button Input Data
-@app.callback(Output('uploadButtonInfo_rawData', 'children'),
-              Output('uploadButtonInfo_rawData', 'color'),
-              Input('uploadButton_rawData', 'contents'),
-              State('uploadButton_rawData', 'filename'))
-def uploadButtonInfo_rawData_update(contents, filename):
+# Show Filename Of Selected File
+# Tab 1 - Sidebar - Card 1
+@app.callback(
+    Output('show_filename_selected_TAB1_SIDEBAR_CARD1', 'children'),
+    Output('show_filename_selected_TAB1_SIDEBAR_CARD1', 'className'),
+    Input('upload_button_TAB1_SIDEBAR_CARD1', 'contents'),
+    State('upload_button_TAB1_SIDEBAR_CARD1', 'filename')
+)
+def update_filename_selected_tab1_sidebar_card1(contents, filename):
     if contents is None:
-        return "فایلی انتخاب نشده است!", 'danger'
-    return filename, 'success'
+        return "No File Choosen!", "text-danger"
+    return filename, "text-success"
 
 
-# Data Generator
-@app.callback(Output('infoData', 'children'),
-              Output('rawData', 'children'),
-              Input('uploadButton_rawData', 'contents'),
-              State('uploadButton_rawData', 'filename'))
-def data_generator(contents, filename):
-    if contents is None:
-        return 'No Data', 'No Data'
-
-    # raw_data - Dictionary Format
-    raw_data = read_excel_data(contents, filename)
-
-    data = data_cleansing(
-        well_info_data_all=raw_data['Info'],
-        dtw_data_all=raw_data['Depth_To_Water'],
-        thiessen_data_all=raw_data['Thiessen'],
-        sc_data_all=raw_data['Storage_Coefficient']
-    )
-
-    return raw_data['Info'].to_json(date_format='iso', orient='split'), data.to_json(date_format='iso', orient='split')
-
-
-# Update Card - Sidebar
-@app.callback(Output('number_aquifer_sidebar_tab1', 'children'),
-              Output('number_well_sidebar_tab1', 'children'),
-              Input('infoData', 'children'))
-def number_aquifer_sidebar_tab1(infoData):
-    if infoData is None or infoData == 'No Data':
-        return 'داده ای پیدا نشد', 'داده ای پیدا نشد'
-    data = pd.read_json(infoData, orient='split')
-    aquifers = list(data['کد محدوده مطالعاتی'].unique())
-    wells = list(data['نام چاه'].unique())
-
-    return f'{len(aquifers)} عدد', f'{len(wells)} عدد'
+# Database (database.csv) Generator From Imported Spreadsheet File
+@app.callback(
+    Output('database', 'children'),
+    Output("database_generator_toast_TAB1_SIDEBAR_CARD1_CONNECT2", "is_open"),
+    Output("database_generator_toast_TAB1_SIDEBAR_CARD1_CONNECT2", "icon"),
+    Output("database_generator_toast_TAB1_SIDEBAR_CARD1_CONNECT2", "children"),
+    Output("database_generator_toast_TAB1_SIDEBAR_CARD1_CONNECT2", "header"),
+    Output("connect_button_TAB1_SIDEBAR_CARD1_CONNECT2", "n_clicks"),
+    Input('upload_button_TAB1_SIDEBAR_CARD1', 'contents'),
+    Input('connect_button_TAB1_SIDEBAR_CARD1_CONNECT2', 'n_clicks'),
+    State('upload_button_TAB1_SIDEBAR_CARD1', 'filename')
+)
+def database_generator(contents, n, filename):
+    if contents is None and n>0:
+        return "No Data", True, "danger", "Error Creating Database: No Spreadsheet Selected", "Warning!", 0
+    elif n>0:
+        data = read_spreadsheet(contents, filename)
+        return data.to_json(date_format='iso', orient='split'), True, "success", "Database Created Successfully", "Success!", 1
+    else:
+        return "No Data", False, "", "", "", 0
 
 
 
 
-# Update Content 1 - Map
-@app.callback(Output('content1Tab1', 'figure'),
-              Input('infoData', 'children'))
-def update_content1Tab1(infoData):
-    if infoData is None or infoData == 'No Data':
-        return No_Matching_Data_Found_Fig
-    data = pd.read_json(infoData, orient='split')
-    mah_code = list(data['کد محدوده مطالعاتی'].unique())
-    geodf, j_file = read_shapfile_AreaStudy(os_moteval='خراسان رضوي', mah_code=mah_code)
+# Create and Update Map
+# Tab 1 - Body - Card 1
+@app.callback(
+    Output('map_TAB1_BODY_CARD1', 'figure'),
+    Input('connect_button_TAB1_SIDEBAR_CARD1_CONNECT2', 'n_clicks'),
+    Input('database', 'children')
+)
+def update_map_tab1_body_card1(n, database):
+    
+    if database is None or database == 'No Data' or n==0:
+        return No_Database_Connection
+    
+    data = pd.read_json(database, orient='split')
+    geo_info = geo_info_dataset(data)
+    
+    mah_code = list(geo_info['study_area_code'].unique())
+    
+    geodf, j_file = read_shapfile(mah_code=mah_code)
 
     fig = px.choropleth_mapbox(data_frame=geodf,
                                geojson=j_file,
@@ -93,15 +91,15 @@ def update_content1Tab1(infoData):
                                opacity=0.3)
 
     for mc in mah_code:
-        df = data[data['کد محدوده مطالعاتی'] == mc]
+        df = geo_info[geo_info['study_area_code'] == mc]
 
         fig.add_trace(
             go.Scattermapbox(
-                lat=df.Y_Decimal,
-                lon=df.X_Decimal,
+                lat=df.decimal_degrees_y,
+                lon=df.decimal_degrees_x,
                 mode='markers',
-                marker=go.scattermapbox.Marker(size=9),
-                text=df['نام چاه']
+                marker=go.scattermapbox.Marker(size=10),
+                text=df['st_en_name']
             )
         )
 
@@ -109,7 +107,7 @@ def update_content1Tab1(infoData):
         mapbox = {'style': "stamen-terrain",
                   'center': {'lon': 58.8,
                              'lat': 35.9 },
-                  'zoom': 5.5},
+                  'zoom': 6},
         showlegend = False,
         hovermode='closest',
         margin = {'l':0, 'r':0, 'b':0, 't':0}
@@ -118,54 +116,30 @@ def update_content1Tab1(infoData):
     return fig
 
 
-
-# Update Content 2 - Map
-@app.callback(Output('content2Tab1', 'figure'),
-              Input('infoData', 'children'))
-def update_content2Tab1(infoData):
-    if infoData == 'No Data':
-        return No_Matching_Data_Found_Fig
-
-    geodf, j_file = read_shapfile_AreaStudy(os_moteval='خراسان رضوي', mah_code=None)
-    fig = px.choropleth_mapbox(data_frame=geodf,
-                               geojson=j_file,
-                               locations='Mah_code',
-                               opacity=0.6,
-                               hover_data={'Mah_Name': True,
-                                           'Mah_code': True,
-                                           'os_moteval': True,
-                                           'Area': ':.2f'})
-    fig.update_layout(
-        mapbox = {'style': "stamen-terrain",
-                  'center': {'lon': 58.8,
-                             'lat': 35.9},
-                  'zoom': 5.5},
-        showlegend = False,
-        hovermode='closest',
-        margin = {'l':0, 'r':0, 'b':0, 't':0}
-    )
-
-    fig.update_layout(
-        hoverlabel=dict(
-            bgcolor="white",
-            font_size=14,
-            font_family="B Koodak"
-        )
-    )
-
-    return fig
-
-
-
-
-
-
-# Update Content 2 - Table
-@app.callback(Output('content3Tab1', 'data'),
-              Output('content3Tab1', 'columns'),
-              Input('infoData', 'children'))
-def update_content3Tab1(infoData):
-    if infoData is None or infoData == 'No Data':
+# Create and Update Table
+# Tab 1 - Body - Card 1
+@app.callback(
+    Output('table_TAB1_BODY_CARD1', 'data'),
+    Output('table_TAB1_BODY_CARD1', 'columns'),
+    Input('connect_button_TAB1_SIDEBAR_CARD1_CONNECT2', 'n_clicks'),
+    Input('database', 'children')
+)
+def update_table_tab1_body_card1(n, database):
+    if database is None or database == 'No Data' or n==0:
         return [{}], []
-    data = pd.read_json(infoData, orient='split')
-    return data.to_dict('records'), [{"name": i, "id": i} for i in data.columns]
+    data = pd.read_json(database, orient='split')
+    geo_info = geo_info_dataset(data)
+    return geo_info.to_dict('records'), [{"name": i, "id": i} for i in geo_info.columns]
+
+
+
+# # Show Notification When Clicked On Connect Button
+# # Sidebar Tab 1 - Card 1
+# @app.callback(Output('show_filename_selected_TAB1_SIDEBAR_CARD1', 'children'),
+#               Output('show_filename_selected_TAB1_SIDEBAR_CARD1', 'className'),
+#               Input('upload_button_TAB1_SIDEBAR_CARD1', 'contents'),
+#               State('upload_button_TAB1_SIDEBAR_CARD1', 'filename'))
+# def uploadButtonInfo_rawData_update(contents, filename):
+#     if contents is None:
+#         return "فایلی انتخاب نشده است!", 'danger'
+#     return filename, 'success'

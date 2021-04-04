@@ -3,7 +3,7 @@ from layouts.main import main_layout
 
 app.layout = main_layout
 
-# from callbacks.main import *
+from callbacks.main import *
 
 if __name__ == '__main__':
     app.run_server(

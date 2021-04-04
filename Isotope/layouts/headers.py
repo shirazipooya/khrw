@@ -11,16 +11,21 @@ Header Tab 1
 
 HEADER_TAB_1 = html.Div(
     children=[
-        html.H1(
+        html.H2(
             children=[
-                "Pooya! ",
-                html.Small(
+                dcc.Markdown(
+                    dangerously_allow_html=True,
                     children=[
-                        "Interface Builder for Bootstrap"
+                        '''
+                        <b>Isotope Analysis!</b> 
+                        <small>Stable Isotope Compositions 
+                        (<b>δ<sup>2</sup>H</b> & <b>δ<sup>18</sup>O</b>) 
+                        of Rainfall</small>
+                        '''
                     ]
                 )
             ],
-            className='page-header m-1 pb-2')
+            className='page-header m-1 pb-2 text-dark')
     ],
-    className="page-header m-1 pb-2"
+    className="page-header m-1 pt-2"
 )
