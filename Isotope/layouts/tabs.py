@@ -51,7 +51,7 @@ TAB_1 = html.Div(
                             className="container-fluid"
                         )
                     ],
-                    className='col px-1 mx-1'
+                    className='my-body'
                 ),
             ],
             className="row p-0 m-0 w-100"
@@ -73,7 +73,7 @@ TAB_1 = html.Div(
             children=[
                 html.Div(
                     id="database",
-                )               
+                )
             ],
             style={
                 'display': 'none'

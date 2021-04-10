@@ -15,7 +15,6 @@ from datetime import date
 from layouts.visualization import *
 
 
-
 """
 -------------------------------------------------------------------------------
 Tab 1
@@ -33,37 +32,49 @@ BODY_TAB_1 = [
         children=[
             dcc.Graph(
                 id='map_TAB1_BODY_CARD1',
-                className="w-100 h-100"
-            )         
+                className="w-100 h-100 mx-4"
+            )
         ],
         className="row"
     ),
     html.Div(
         children=[
-            dash_table.DataTable(
-                id='table_TAB1_BODY_CARD1',
-                style_table={
-                    'overflowX': 'auto',
-                    'overflowY': 'auto',
-                    'padding':'5px'
-                },
-                style_cell={
-                    'border': '1px solid grey',
-                    'font-size': '12px',
-                    # 'font_family': 'B Koodak',
-                    'font_size': '12px',
-                    'text_align': 'right',
-                    'minWidth': 100,
-                    'maxWidth': 150,
-                    'width': 125
-                },
-                style_header={
-                    'backgroundColor': 'rgb(230, 230, 230)',
-                    'fontWeight': 'bold',
-                    'whiteSpace': 'normal',
-                },
-                page_size=15
+            html.Div(
+                children=[
+                    dash_table.DataTable(
+                        id='table_TAB1_BODY_CARD1',
+                        style_table={
+                            'overflowX': 'auto',
+                            'overflowY': 'auto',
+                            # 'padding': '5px'
+                        },
+                        style_cell={
+                            'border': '1px solid grey',
+                            'font-size': '14px',
+                            # 'font_family': 'B Koodak',
+                            'text_align': 'right',
+                            'minWidth': 50,
+                            'maxWidth': 100,
+                            'width': 75
+                        },
+                        style_header={
+                            'backgroundColor': 'rgb(230, 230, 230)',
+                            'fontWeight': 'bold',
+                            'whiteSpace': 'normal',
+                        },
+                        css=[{
+                            'selector': '.dash-table-tooltip',
+                            'rule': 'background-color: yellow;'
+                        }],
+                        tooltip_delay=0,
+                        tooltip_duration=None,
+                        page_size=15
+                    )
+
+                ],
+                className="w-100 h-100 mx-3"
             )
+
         ],
         className="row justify-content-center"
     )

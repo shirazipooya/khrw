@@ -55,15 +55,13 @@ def update_filename_selected_tab1_sidebar_card1(contents, filename):
     State('upload_button_TAB1_SIDEBAR_CARD1', 'filename')
 )
 def database_generator(contents, n, filename):
-    if contents is None and n>0:
+    if contents is None and n > 0:
         return "No Data", True, "danger", "Error Creating Database: No Spreadsheet Selected", "Warning!", 0
-    elif n>0:
+    elif n > 0:
         data = read_spreadsheet(contents, filename)
         return data.to_json(date_format='iso', orient='split'), True, "success", "Database Created Successfully", "Success!", 1
     else:
         return "No Data", False, "", "", "", 0
-
-
 
 
 # Create and Update Map
@@ -74,15 +72,15 @@ def database_generator(contents, n, filename):
     Input('database', 'children')
 )
 def update_map_tab1_body_card1(n, database):
-    
-    if database is None or database == 'No Data' or n==0:
+
+    if database is None or database == 'No Data' or n == 0:
         return No_Database_Connection
-    
+
     data = pd.read_json(database, orient='split')
     geo_info = geo_info_dataset(data)
-    
+
     mah_code = list(geo_info['study_area_code'].unique())
-    
+
     geodf, j_file = read_shapfile(mah_code=mah_code)
 
     fig = px.choropleth_mapbox(data_frame=geodf,
@@ -104,13 +102,13 @@ def update_map_tab1_body_card1(n, database):
         )
 
     fig.update_layout(
-        mapbox = {'style': "stamen-terrain",
-                  'center': {'lon': 58.8,
-                             'lat': 35.9 },
-                  'zoom': 6},
-        showlegend = False,
+        mapbox={'style': "stamen-terrain",
+                'center': {'lon': 58.8,
+                           'lat': 35.9},
+                'zoom': 6},
+        showlegend=False,
         hovermode='closest',
-        margin = {'l':0, 'r':0, 'b':0, 't':0}
+        margin={'l': 0, 'r': 0, 'b': 0, 't': 0}
     )
 
     return fig
@@ -121,16 +119,22 @@ def update_map_tab1_body_card1(n, database):
 @app.callback(
     Output('table_TAB1_BODY_CARD1', 'data'),
     Output('table_TAB1_BODY_CARD1', 'columns'),
+    Output('table_TAB1_BODY_CARD1', 'tooltip_header'),
+    Output('table_TAB1_BODY_CARD1', 'tooltip_data'),
     Input('connect_button_TAB1_SIDEBAR_CARD1_CONNECT2', 'n_clicks'),
     Input('database', 'children')
 )
 def update_table_tab1_body_card1(n, database):
-    if database is None or database == 'No Data' or n==0:
-        return [{}], []
+    if database is None or database == 'No Data' or n == 0:
+        return [{}], [], {}, [{}]
     data = pd.read_json(database, orient='split')
     geo_info = geo_info_dataset(data)
-    return geo_info.to_dict('records'), [{"name": i, "id": i} for i in geo_info.columns]
-
+    return geo_info.to_dict('records'), [{"name": i, "id": i} for i in geo_info.columns], {j: j for j in geo_info.columns}, [
+        {
+            column: {'value': str(value), 'type': 'markdown'}
+            for column, value in row.items()
+        } for row in geo_info.to_dict('records')
+    ]
 
 
 # # Show Notification When Clicked On Connect Button
