@@ -32,7 +32,7 @@ BODY_TAB_1 = [
         children=[
             dcc.Graph(
                 id='map_TAB1_BODY_CARD1',
-                className="w-100 h-100 mx-4"
+                className="w-100 h-100 mx-4 mb-4"
             )
         ],
         className="row"

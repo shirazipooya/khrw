@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 import json
+import datetime
 
 
 
@@ -25,30 +26,60 @@ def read_spreadsheet(contents, filename):
 
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
+    dateBank = pd.read_parquet(path="assets/database/myDate.parquet.gzip")      
+    database = pd.DataFrame()
 
     # Assume That The User Uploaded a CSV File
     if 'csv' in filename:        
         data = pd.read_csv(
             io.StringIO(decoded.decode('utf-8'))
         )
-        data.to_csv(
+        
+        data["time"] = datetime.datetime.strptime('00:00:00', '%H:%M:%S').time()
+               
+        for st in data["st_en_name"].unique():
+            df = data[data["st_en_name"] == st]            
+            df = pd.merge(  
+                left=df,
+                right=dateBank[(dateBank["date_gregorian"].dt.year >= df["sampling_date"].dt.year.min()) & (dateBank["date_gregorian"].dt.year <= df["sampling_date"].dt.year.max())],
+                how="left",
+                left_on=["sampling_date", "time"],
+                right_on=["date_gregorian", "time"],            
+            )
+            database = pd.concat([database, df])
+        database.to_csv(
             path_or_buf='assets/database/database.csv',
             encoding='utf-8', 
             index=False
         )
-        return data
+        return database
     
     # Assume That The User Uploaded An EXCEL File
-    elif 'xlsx' in filename:        
+    elif 'xlsx' in filename: 
+               
         data =  pd.read_excel(
             io.BytesIO(decoded)
         )
-        data.to_csv(
+        
+        data["time"] = datetime.datetime.strptime('00:00:00', '%H:%M:%S').time()
+        
+        for st in data["st_en_name"].unique():
+            df = data[data["st_en_name"] == st]            
+            df = pd.merge(  
+                left=df,
+                right=dateBank[(dateBank["date_gregorian"].dt.year >= df["sampling_date"].dt.year.min()) & (dateBank["date_gregorian"].dt.year <= df["sampling_date"].dt.year.max())],
+                how="left",
+                left_on=["sampling_date", "time"],
+                right_on=["date_gregorian", "time"],            
+            )
+            database = pd.concat([database, df])
+        
+        database.to_csv(
             path_or_buf='assets/database/database.csv',
             encoding='utf-8', 
             index=False
         )
-        return data
+        return database
 
 
 # Generate Geographical Information Dataset
@@ -76,6 +107,29 @@ def read_shapfile(
             feature['id'] = feature['properties']['Mah_code']
 
         return geodf, j_file
+    
+    
+#  
+def calculate_result(data=None, study_area=None, station=None, values=None, index=None, aggfunc=None, weighted_parameter=None):  
+    
+    data = data[data["study_area_name"] == study_area]
+    data = data[data["st_en_name"] == station]
+    
+    if weighted_parameter is not None:
+        data = data.dropna(subset=[weighted_parameter])
+        weighted_average_fun = lambda rows: np.average(rows, weights=data.loc[rows.index, weighted_parameter])
+        if "wa_func" in aggfunc:
+            aggfunc = [weighted_average_fun if x=="wa_func" else x for x in aggfunc]
+    
+    result = data.pivot_table(
+        values=values,
+        index=index,
+        aggfunc={values[i]: aggfunc[i] for i in range(len(values))}
+    ).reset_index()
+    
+    result["d_excess"] = result["hydrogen_isotope_values"] - 8 * result["oxygen_isotope_values"]
+    
+    return result
 
 
 

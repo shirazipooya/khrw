@@ -97,7 +97,7 @@ CARD_1 = html.Div(
                             duration=5000,
                             style={
                                 "position": "fixed",
-                                "top": 49,
+                                "top": 48,
                                 "right": 50,
                                 "width": 350
                             },                        
