@@ -1,9 +1,9 @@
-/* @font-face {
-  font-family: "Operator";
-  src: url("../fonts/operator-light-webfont.eot");
-  src: url("../fonts/operator-light-webfont.woff") format("woff"),
-    url("../fonts/operator-light-webfont.ttf") format("truetype");
-} */
+@font-face {
+	font-family: "Nunito";
+	src: url("../fonts/nunito-regular.eot");
+	src: url("../fonts/nunito-regular.woff") format("woff"),
+    url("../fonts/nunito-regular.ttf") format("truetype");
+}
 
 * {
   margin: 0;
@@ -31,7 +31,7 @@
 }
 
 body {
-  /* font-family: "Operator"; */
+  font-family: "Nunito";
   /* direction: rtl; */
   /* text-align: right; */
 }
