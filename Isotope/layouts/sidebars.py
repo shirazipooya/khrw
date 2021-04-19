@@ -261,7 +261,7 @@ SIDEBAR_TAB_1 = html.Div(
                 html.Div(
                     children=[
                         CARD_1,
-                        CARD_2
+                        # CARD_2
                     ],
                     className='col px-0'
                 ),
